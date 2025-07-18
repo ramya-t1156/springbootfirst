@@ -83,7 +83,7 @@ public class AuthService {
 
 
 // response like JwtResponse
-public JwtResponse authenticate(RegisterDetails login) {
+    public JwtResponse authenticate(RegisterDetails login) {
     Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(login.getUserName(), login.getPassword())
     );
