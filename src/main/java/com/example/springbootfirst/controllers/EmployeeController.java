@@ -4,6 +4,8 @@ import com.example.springbootfirst.models.RegisterDetails;
 import com.example.springbootfirst.models.UserDetailsDto;
 import com.example.springbootfirst.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +21,7 @@ public class EmployeeController {
     EmployeeService employeeService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public List<RegisterDetails> getEmployees(){
         return employeeService.getAllEmployees();
     }
@@ -65,4 +67,15 @@ public class EmployeeController {
     public List<RegisterDetails> getEmployeesByRoles(@PathVariable String role){
         return employeeService.findEmployeesByRole(role);
     }
+
+
+    @GetMapping("/search")
+    public ResponseEntity<List<RegisterDetails>> searchByUserName(@RequestParam String userName) {
+        List<RegisterDetails> results = employeeService.searchByUserName(userName);
+        if (results.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
+
 }
