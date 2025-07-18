@@ -53,18 +53,33 @@ public class EmployeeService {
 
 
     public String deleteEmployeeById(int id) {
-        if (!regRepo.existsById(id)) {
+
+        Optional<RegisterDetails> optional = regRepo.findById(id);
+        if (!optional.isPresent()) {
             throw new RuntimeException("Employee not found with id: " + id);
         }
+
+        RegisterDetails employee = optional.get();
+        employee.getRoles().clear();
+        regRepo.save(employee);
+
         regRepo.deleteById(id);
         return "Employee deleted successfully";
     }
 
 
-    public String deleteAllEmployees(){
+    public String deleteAllEmployees() {
+        List<RegisterDetails> allUsers = regRepo.findAll();
+
+        for (RegisterDetails user : allUsers) {
+            user.getRoles().clear();
+            regRepo.save(user);
+        }
+
         regRepo.deleteAll();
         return "All employee deleted successfully";
     }
+
 
 //  1 .  Update query by id
 
@@ -76,7 +91,9 @@ public class EmployeeService {
 
             existingEmployee.setName(employee.getName());
             existingEmployee.setEmail(employee.getEmail());
-            existingEmployee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            if (employee.getPassword() != null && !employee.getPassword().trim().isEmpty()) {
+                existingEmployee.setPassword(passwordEncoder.encode(employee.getPassword()));
+            }
             existingEmployee.setUserName(employee.getUserName());
 
             Set<Roles> roles = new HashSet<>();
@@ -110,5 +127,10 @@ public class EmployeeService {
         }
         return employees;
     }
+
+    public List<RegisterDetails> searchByUserName(String userName) {
+        return regRepo.findByUserNameContainingIgnoreCase(userName);
+    }
+
 
 }
